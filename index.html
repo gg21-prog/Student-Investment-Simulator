@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Investment Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <span class="logo">&#9650;</span>
+      <span class="header-title">Investment Simulator</span>
+    </div>
+    <div class="header-stats">
+      <div class="stat-pill">
+        <span class="pill-label">Cash</span>
+        <span class="pill-value" id="balance">&#8377;1,00,000</span>
+      </div>
+      <div class="stat-pill">
+        <span class="pill-label">Portfolio Value</span>
+        <span class="pill-value" id="port-value">&#8377;0</span>
+      </div>
+      <div class="stat-pill">
+        <span class="pill-label">Total P&amp;L</span>
+        <span class="pill-value" id="total-pl">&#8377;0</span>
+      </div>
+      <button class="reset-btn" onclick="resetSim()">Reset</button>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
+
+    <!-- LEFT: Trade Panel + Stock List -->
+    <aside class="left-panel">
+
+      <div class="panel-card trade-card">
+        <h3>Place Order</h3>
+        <label>Stock</label>
+        <select id="stock-select" onchange="onStockChange()"></select>
+        <div class="price-preview">
+          Price: <strong id="selected-price">—</strong>
+        </div>
+        <label>Quantity</label>
+        <input type="number" id="qty-input" placeholder="e.g. 5" min="1" />
+        <div class="cost-preview">
+          Est. Cost: <strong id="est-cost">—</strong>
+        </div>
+        <div class="btn-row">
+          <button class="buy-btn" onclick="buyStock()">Buy</button>
+          <button class="sell-btn" onclick="sellStock()">Sell</button>
+        </div>
+        <p id="trade-msg" class="msg"></p>
+      </div>
+
+      <div class="panel-card stock-list-card">
+        <h3>Market Prices</h3>
+        <ul id="stock-list"></ul>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT: Portfolio + Chart -->
+    <main class="right-panel">
+
+      <div class="panel-card portfolio-card">
+        <h3>My Portfolio</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Qty</th>
+                <th>Avg Buy</th>
+                <th>Current</th>
+                <th>P&amp;L</th>
+              </tr>
+            </thead>
+            <tbody id="portfolio-body">
+              <tr><td colspan="5" class="empty-msg">No holdings yet — buy something!</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel-card chart-card">
+        <h3>Asset Allocation</h3>
+        <div class="chart-wrap">
+          <canvas id="pie-chart"></canvas>
+          <p id="chart-empty" class="empty-msg">Holdings will appear here.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="stocks.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
