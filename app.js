@@ -13,6 +13,63 @@ function fmt2(n) {
   return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
 
+// ── Analytics helpers ──────────────────────────────────
+function sparklineSVG(history) {
+  const w = 56, h = 22;
+  const min = Math.min(...history), max = Math.max(...history);
+  const range = max - min || 1;
+  const pts = history.map((v, i) => {
+    const x = (i / (history.length - 1)) * w;
+    const y = h - ((v - min) / range) * h;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+  const up = history[history.length - 1] >= history[0];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${up ? "#4ade80" : "#f87171"}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function linearTrend(history) {
+  const n = history.length;
+  const xm = (n - 1) / 2;
+  const ym = history.reduce((a, b) => a + b) / n;
+  let num = 0, den = 0;
+  history.forEach((y, x) => { num += (x - xm) * (y - ym); den += (x - xm) ** 2; });
+  const slope = den ? num / den : 0;
+  const predicted = history[n - 1] + slope;
+  const pct = ((predicted - history[n - 1]) / history[n - 1]) * 100;
+  return { predicted, pct };
+}
+
+function renderAnalytics(symbols) {
+  // Best / worst by % gain among holdings
+  const best  = document.getElementById("an-best");
+  const worst = document.getElementById("an-worst");
+  const pred  = document.getElementById("an-predict");
+
+  if (symbols.length === 0) {
+    best.innerHTML = worst.innerHTML = pred.innerHTML = "";
+    return;
+  }
+
+  let bestSym = null, worstSym = null, bestPct = -Infinity, worstPct = Infinity;
+  symbols.forEach(sym => {
+    const h = holdings[sym];
+    const pct = ((getStock(sym).price - h.buyPrice) / h.buyPrice) * 100;
+    if (pct > bestPct)  { bestPct  = pct;  bestSym  = sym; }
+    if (pct < worstPct) { worstPct = pct;  worstSym = sym; }
+  });
+
+  best.innerHTML  = bestSym  ? `<span class="an-label">Best</span><span class="an-val profit">${holdings[bestSym].name.split(" ")[0]} <small>${bestPct >= 0 ? "+" : ""}${bestPct.toFixed(1)}%</small></span>` : "";
+  worst.innerHTML = worstSym ? `<span class="an-label">Worst</span><span class="an-val loss">${holdings[worstSym].name.split(" ")[0]} <small>${worstPct >= 0 ? "+" : ""}${worstPct.toFixed(1)}%</small></span>` : "";
+
+  // Trend prediction for selected stock
+  const sym   = document.getElementById("stock-select").value;
+  const stock = getStock(sym);
+  const { pct } = linearTrend(stock.history);
+  const dir  = pct >= 0 ? "▲" : "▼";
+  const cls  = pct >= 0 ? "profit" : "loss";
+  pred.innerHTML = `<span class="an-label">${stock.symbol} Trend</span><span class="an-val ${cls}">${dir} ${Math.abs(pct).toFixed(2)}% <small>est. next</small></span>`;
+}
+
 // ── Init ──────────────────────────────────────────────
 function init() {
   const select = document.getElementById("stock-select");
@@ -61,7 +118,10 @@ function buildStockList() {
         <div class="sl-name">${s.name}</div>
         <div class="sl-sym">${s.symbol}</div>
       </div>
-      <div class="sl-price">${fmt(s.price)}</div>`;
+      <div class="sl-right">
+        ${sparklineSVG(s.history)}
+        <div class="sl-price">${fmt(s.price)}</div>
+      </div>`;
     li.onclick = () => {
       document.getElementById("stock-select").value = s.symbol;
       onStockChange();
@@ -76,6 +136,7 @@ function onStockChange() {
   const qty   = parseInt(document.getElementById("qty-input").value) || 0;
   updatePreviews(stock, qty);
   highlightActiveStock(sym);
+  renderAnalytics(Object.keys(holdings));
 }
 
 function updatePreviews(stock, qty) {
@@ -183,6 +244,7 @@ function render() {
   }
 
   renderChart(symbols);
+  renderAnalytics(symbols);
 }
 
 function renderChart(symbols) {

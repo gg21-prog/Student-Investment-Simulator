@@ -271,4 +271,50 @@ tbody tr:hover td { background: #1a2535; }
   justify-content: center;
 }
 
-#pie-chart { max-width: 160px; max-height: 160px; }
+#pie-chart { max-width: 150px; max-height: 150px; }
+
+/* ── Analytics ── */
+.analytics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  border-top: 1px solid #2d3f55;
+  padding-top: 12px;
+}
+
+.analytic-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  min-height: 20px;
+}
+
+.an-label {
+  font-size: 0.68rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.an-val {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.an-val small {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #64748b;
+  margin-left: 3px;
+}
+
+/* ── Sparkline in stock list ── */
+.sl-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.sl-price { font-size: 0.82rem; font-weight: 600; color: #a5b4fc; }
